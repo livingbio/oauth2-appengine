@@ -1,20 +1,14 @@
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template, util
-from .models import User
 import json as simplejson
-
 import urllib
+from .. import users
 
 from oauth.models import OAuth_Authorization, OAuth_Token, OAuth_Client
 
 def extract(keys, d):
     """ Extracts subset of a dict into new dict """
     return dict((k, d[k]) for k in keys if k in d)
-
-def get_current_user(handler):
-    username = handler.request.get('username')
-    password = handler.request.get('password')
-    return User.auth(username, password)
 
 class AuthorizationHandler(webapp.RequestHandler):
     SUPPORTED_RESPONSE_TYPES = [
@@ -64,7 +58,7 @@ class AuthorizationHandler(webapp.RequestHandler):
 
         return True
 
-    @util.login_required
+    @users.login_required
     def get(self):
         # TODO: put scope into ui
         if not self.validate_params():

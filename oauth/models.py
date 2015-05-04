@@ -1,4 +1,4 @@
-from google.appengine.ext import db, ndb
+from google.appengine.ext import db
 from google.apepngine.api import memcache
 import time
 import hashlib
@@ -9,20 +9,6 @@ def now():
 
 def random_str():
     return hashlib.sha1(str(random.random())).hexdigest()
-
-
-class User(ndb.Model):
-    username = ndb.StringProperty()
-    password = ndb.StringProperty(indexed=False)
-
-    @classmethod
-    def login(cls, username, password):
-        user = User.get_by_id(username)
-        return user.auth(password)
-
-    def auth(self, password):
-        return self.password == hashlib.sha1(password).hexdigest()
-
 
 class OAuth_Token(db.Model):
     EXPIRY_TIME = 3600*24
