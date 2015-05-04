@@ -85,7 +85,7 @@ def create_login_url(uri):
 class LoginHandler(webapp2.RequestHandler):
     def get(self):
         redirect = self.request.get('redirect')
-        template = jinja2.Template('templates/authorize.html')
+        template = jinja2.Template(open('templates/login.html').read())
         self.response.out.write(
             template.render({'redirect': redirect})
         )
@@ -97,7 +97,7 @@ class LoginHandler(webapp2.RequestHandler):
 
         user = User.login(username, password)
         if not user:
-            self.response.out.write(False)
+            return self.response.out.write(False)
 
         self.response.set_cookie("uid", user.username)
         self.response.set_cookie("secret", user.gen_secret())

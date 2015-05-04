@@ -1,7 +1,7 @@
-libraries:
-- name: jinja2
-  version: "latest"
 
 handlers:
 - url: /oauth/*
   script: main.app
+
+- url: /user/login
+  script: users.app
