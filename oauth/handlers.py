@@ -1,6 +1,6 @@
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template, util
-from google.appengine.api import users
+from .models import User
 import json as simplejson
 
 import urllib
@@ -10,6 +10,11 @@ from oauth.models import OAuth_Authorization, OAuth_Token, OAuth_Client
 def extract(keys, d):
     """ Extracts subset of a dict into new dict """
     return dict((k, d[k]) for k in keys if k in d)
+
+def get_current_user(handler):
+    username = handler.request.get('username')
+    password = handler.request.get('password')
+    return User.auth(username, password)
 
 class AuthorizationHandler(webapp.RequestHandler):
     SUPPORTED_RESPONSE_TYPES = [
@@ -29,7 +34,7 @@ class AuthorizationHandler(webapp.RequestHandler):
         self.authz_redirect(error)
 
     def validate_params(self):
-        self.user = users.get_current_user()
+        self.user = get_current_user(self)
         if self.request.method == 'POST' and not self.user:
             self.error(403)
             self.response.out.write("Authentication required.")
@@ -64,6 +69,8 @@ class AuthorizationHandler(webapp.RequestHandler):
         # TODO: put scope into ui
         if not self.validate_params():
             return
+
+        # TODO: reture username / password page
         template_data = extract([
             'response_type',
             'redirect_uri',
@@ -167,7 +174,7 @@ class AccessTokenHandler(webapp.RequestHandler):
         username = self.request.get('username')
         password = self.request.get('password')
 
-        if not username or not password:
+        if not username or not password or not User.auth(username):
             self.render_error('invalid_grant', "Invalid end-user credentials.")
             return
 

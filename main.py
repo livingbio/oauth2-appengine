@@ -25,7 +25,7 @@ class ClientsHandler(webapp.RequestHandler):
     def get(self):
         clients = OAuth_Client.all()
         self.response.out.write(
-            template.render('templates/clients.html', clients=clients)
+            template.render('templates/clients.html', {"clients": clients})
 
     def post(self):
         client = OAuth_Client(

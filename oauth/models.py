@@ -1,4 +1,5 @@
-from google.appengine.ext import db
+from google.appengine.ext import db, ndb
+from google.apepngine.api import memcache
 import time
 import hashlib
 import random
@@ -9,46 +10,60 @@ def now():
 def random_str():
     return hashlib.sha1(str(random.random())).hexdigest()
 
+
+class User(ndb.Model):
+    username = ndb.StringProperty()
+    password = ndb.StringProperty(indexed=False)
+
+    @classmethod
+    def login(cls, username, password):
+        user = User.get_by_id(username)
+        return user.auth(password)
+
+    def auth(self, password):
+        return self.password == hashlib.sha1(password).hexdigest()
+
+
 class OAuth_Token(db.Model):
     EXPIRY_TIME = 3600*24
-    
+
     user_id         = db.StringProperty()
     client_id       = db.StringProperty()
     access_token    = db.StringProperty()
     refresh_token   = db.StringProperty(required=False)
     scope           = db.StringProperty(required=False)
     expires         = db.IntegerProperty(required=False)
-    
+
     @classmethod
     def get_by_refresh_token(cls, refresh_token):
         return cls.all().filter('refresh_token =', refresh_token).get()
-    
+
     @classmethod
     def get_by_access_token(cls, access_token):
         return cls.all().filter('access_token =', access_token).get()
-    
+
     def put(self, can_refresh=True):
         if can_refresh:
             self.refresh_token  = random_str()
         self.access_token       = random_str()
         self.expires            = now() + self.EXPIRY_TIME
         super(OAuth_Token, self).put()
-    
+
     def refresh(self):
         if not self.refresh_token:
             return None # Raise exception?
-            
+
         token = OAuth_Token(
-            client_id   = self.client_id, 
+            client_id   = self.client_id,
             user_id     = self.user_id,
             scope       = self.scope, )
         token.put()
         self.delete()
         return token
-    
+
     def is_expired(self):
         return self.expires < now()
-    
+
     def serialize(self, requested_scope=None):
         token = dict(
             access_token        = self.access_token,
@@ -63,25 +78,25 @@ class OAuth_Token(db.Model):
 
 class OAuth_Authorization(db.Model):
     EXPIRY_TIME = 3600
-    
+
     user_id         = db.StringProperty()
     client_id       = db.StringProperty()
     code            = db.StringProperty()
     redirect_uri    = db.StringProperty()
     expires         = db.IntegerProperty()
-    
+
     @classmethod
     def get_by_code(cls, code):
         return cls.all().filter('code =', code).get()
-    
+
     def put(self):
         self.code       = random_str()
         self.expires    = now() + self.EXPIRY_TIME
         super(OAuth_Authorization, self).put()
-    
+
     def is_expired(self):
         return self.expires < now()
-    
+
     def validate(self, code, redirect_uri, client_id=None):
         valid = not self.is_expired() \
             and self.code == code \
@@ -89,7 +104,7 @@ class OAuth_Authorization(db.Model):
         if client_id:
             valid &= self.client_id == client_id
         return valid
-    
+
     def serialize(self, state=None):
         authz = {'code': self.code}
         if state:
@@ -102,7 +117,7 @@ class OAuth_Client(db.Model):
     client_id       = db.StringProperty()
     client_secret   = db.StringProperty()
     redirect_uri    = db.StringProperty()
-    
+
     # This is not necessary according to spec,
     # however, effectively you need it for UX
     name            = db.StringProperty()
@@ -110,7 +125,7 @@ class OAuth_Client(db.Model):
     @classmethod
     def get_by_client_id(cls, client_id):
         return cls.all().filter('client_id =', client_id).get()
-    
+
     @classmethod
     def authenticate(cls, client_id, client_secret):
         client = cls.get_by_client_id(client_id)
@@ -118,7 +133,7 @@ class OAuth_Client(db.Model):
             return client
         else:
             return None
-    
+
     def put(self):
         self.client_id      = random_str()
         self.client_secret  = random_str()
