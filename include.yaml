@@ -1,0 +1,4 @@
+
+handlers:
+- url: /oauth/*
+  script: main.app

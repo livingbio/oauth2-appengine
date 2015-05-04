@@ -1,5 +1,5 @@
 from google.appengine.ext import webapp, db
-from django.utils import simplejson
+import json as simplejson
 
 from google.appengine.ext.webapp import util, template
 from google.appengine.api import users
@@ -21,12 +21,12 @@ class MainHandler(webapp.RequestHandler):
 class ClientsHandler(webapp.RequestHandler):
     """ This is only indirectly necessary since the spec
         calls for clients, but managing them is out of scope  """
-    
+
     def get(self):
         clients = OAuth_Client.all()
         self.response.out.write(
             template.render('templates/clients.html', locals()))
-    
+
     def post(self):
         client = OAuth_Client(
             name            = self.request.get('name'),
@@ -35,11 +35,11 @@ class ClientsHandler(webapp.RequestHandler):
         self.redirect(self.request.path)
 
 class ProtectedResourceHandler(webapp.RequestHandler):
-    """ This is an example of a resource protected by OAuth 
+    """ This is an example of a resource protected by OAuth
         and requires the 'read' scope """
-        
+
     SECRET_PAYLOAD = 'bananabread'
-    
+
     @oauth_required(scope='read')
     def get(self, token):
         self.response.headers['Content-Type'] = "application/json"
@@ -56,6 +56,8 @@ def application():
 
 def main():
     util.run_wsgi_app(application())
+
+app = application()
 
 if __name__ == '__main__':
     main()
