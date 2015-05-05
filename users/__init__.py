@@ -71,7 +71,8 @@ class User(ndb.Model):
     @classmethod
     def register(cls, email, password):
         user = User.get_by_email(email)
-        assert not user # username is in used
+        if user: return
+        # assert not user # username is in used
 
         user = User(
             email=email,
@@ -143,8 +144,10 @@ class RegisterHandler(webapp2.RequestHandler):
         email = self.request.get("email")
 
         user = User.register(email, password)
+        if user:
+            return self.response.out.write(True)
 
-        self.response.out.write(True)
+        self.response.out.write(False)
 
 app = webapp2.WSGIApplication([
     (r'/user/login', LoginHandler),
