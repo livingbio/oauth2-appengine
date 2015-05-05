@@ -25,7 +25,7 @@ class ClientsHandler(webapp.RequestHandler):
     def get(self):
         clients = OAuth_Client.all()
         self.response.out.write(
-            template.render('templates/clients.html', {"clients": clients})
+            template.render('templates/clients.html', {"clients": clients}))
 
     def post(self):
         client = OAuth_Client(
@@ -52,7 +52,9 @@ def application():
         ('/oauth/authorize',    AuthorizationHandler),
         ('/oauth/token',        AccessTokenHandler),
         ('/protected/resource', ProtectedResourceHandler),
-        ('/admin/clients',      ClientsHandler),    ],debug=True)
+        ('/admin/clients',      ClientsHandler),
+    ],
+    debug=False)
 
 def main():
     util.run_wsgi_app(application())

@@ -1,4 +1,10 @@
 
 handlers:
-- url: /oauth/*
+- url: /oauth/.*
   script: main.app
+
+- url: /user/.*
+  script: users.app
+
+# - url: /user/logout
+#   script: users.app

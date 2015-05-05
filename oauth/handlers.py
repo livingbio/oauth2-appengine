@@ -1,9 +1,8 @@
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template, util
-from .models import User
 import json as simplejson
-
 import urllib
+import users
 
 from oauth.models import OAuth_Authorization, OAuth_Token, OAuth_Client
 
@@ -11,16 +10,14 @@ def extract(keys, d):
     """ Extracts subset of a dict into new dict """
     return dict((k, d[k]) for k in keys if k in d)
 
-def get_current_user(handler):
-    username = handler.request.get('username')
-    password = handler.request.get('password')
-    return User.auth(username, password)
-
 class AuthorizationHandler(webapp.RequestHandler):
     SUPPORTED_RESPONSE_TYPES = [
         'code',
         'token',
         'code_and_token', ] # NOTE: code_and_token may be removed in spec
+
+    def redirect(self, uri):
+        super(AuthorizationHandler, self).redirect(str(uri))
 
     def authz_redirect(self, query, fragment=None):
         query_string    = ('?%s' % urllib.urlencode(query))     if query else ''
@@ -34,7 +31,7 @@ class AuthorizationHandler(webapp.RequestHandler):
         self.authz_redirect(error)
 
     def validate_params(self):
-        self.user = get_current_user(self)
+        self.user = users.get_current_user(self)
         if self.request.method == 'POST' and not self.user:
             self.error(403)
             self.response.out.write("Authentication required.")
@@ -64,7 +61,7 @@ class AuthorizationHandler(webapp.RequestHandler):
 
         return True
 
-    @util.login_required
+    @users.login_required
     def get(self):
         # TODO: put scope into ui
         if not self.validate_params():
