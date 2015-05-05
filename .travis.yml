@@ -1,0 +1,34 @@
+notifications:
+  slack: tagtoo:nVKAkV8qa1GhV5COWbmdnKjY
+language: python
+python:
+- '2.7'
+
+sudo: false
+
+before_install:
+- bash scripts/dl_gae_sdk.sh
+- git config user.email "tagtoo@tagtoo.org"
+- git config user.name "Travis"
+
+install:
+- pip install -r scripts/requirements-appengine.txt
+- pip install -r scripts/requirements-test.txt
+
+script:
+- export PYTHONPATH=/home/travis/build/Tagtoo/oauth2-appengine/
+- nosetests --with-gae --gae-lib-root=google_appengine --exclude-dir=src --exclude-dir=scripts --exclude-dir=lib --logging-level=ERROR --with-coverage --cover-package={users,oauth}
+- coverage html
+
+after_success:
+# - gae_token=1/nsW57-zAKIZVG8udtmMaTscNh3VqlBbZtdAPAKL-I7oMEudVrK5jSpoR30zcRFq6
+# - version=$(date +"%Y-%m-%d-%H%M%S-$TRAVIS_COMMIT")
+# - test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && ./google_appengine/appcfg.py update --oauth2_refresh_token=$gae_token . -V $version
+# - test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && ./google_appengine/appcfg.py update --oauth2_refresh_token=$gae_token . -V 1
+# - python ./scripts/deploy.py clean
+- test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && deploy=1
+# - test $deploy && ./scripts/submodule_update.sh git@github.com:Tagtoo/adex2.git lib/ec
+
+branches:
+  only:
+    - master

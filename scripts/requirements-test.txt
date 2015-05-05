@@ -1,0 +1,10 @@
+# package for test only or include in appengine enviornment
+unittest2==0.8.0
+WebTest==2.0.16
+fake-factory==0.4.2
+mock==1.0.1
+nose-cov==1.6
+coverage==3.7.1
+clime==0.2.7
+nosegae
+nose-exclude
