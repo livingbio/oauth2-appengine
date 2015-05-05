@@ -125,6 +125,14 @@ class LoginHandler(webapp2.RequestHandler):
 
         self.response.out.write(True)
 
+class LogoutHandler(webapp2.RequestHandler):
+    def get(self):
+        user = get_current_user(self)
+        if user:
+            self.response.delete_cookie("uid")
+            self.response.delete_cookie("secret")
+
 app = webapp2.WSGIApplication([
-    (r'/user/login', LoginHandler)
+    (r'/user/login', LoginHandler),
+    (r'/user/logout', LogoutHandler)
 ], debug=False)
