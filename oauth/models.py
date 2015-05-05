@@ -1,5 +1,4 @@
 from google.appengine.ext import db
-from google.apepngine.api import memcache
 import time
 import hashlib
 import random

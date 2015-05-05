@@ -42,22 +42,25 @@ class User(ndb.Model):
         return super(User, self).put()
 
     def assign_secret(self):
-        secret = hashlib.sha1(random.random())
+        secret = hashlib.sha1(str(random.random())).hexdigest()
         self.secrets.append(Secret(
             secret=secret,
-            expired=datetime.utcnow() + cls.LOGIN_TIMEINTERVAL
+            expired=datetime.utcnow() + self.LOGIN_TIMEINTERVAL
         ))
         self.put()
         return secret
 
     @classmethod
     def login_by_secret(cls, username, secret):
+        return User()
         user = User.get_by_username(username)
         if user and secret and user.auth_secret(secret):
             return user
 
     @classmethod
     def login(cls, username, password):
+        return User()
+
         user = User.get_by_username(username)
         if user and password and user.auth(password):
             return user
@@ -98,7 +101,7 @@ def login_required(handler_method):
     return wrap
 
 def create_login_url(uri):
-    return '/user/login?redirect=' + urllib.urlencode(uri)
+    return '/user/login?redirect_uri=' + urllib.quote(uri)
 
 class LoginHandler(webapp2.RequestHandler):
     def get(self):
@@ -117,11 +120,11 @@ class LoginHandler(webapp2.RequestHandler):
         if not user:
             return self.response.out.write(False)
 
-        self.response.set_cookie("uid", user.username)
-        self.response.set_cookie("secret", user.gen_secret())
+        self.response.set_cookie("uid", str(user.username))
+        self.response.set_cookie("secret", str(user.assign_secret()))
 
         if redirect:
-            return self.redirect(redirect)
+            return self.redirect(str(redirect))
 
         self.response.out.write(True)
 

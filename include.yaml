@@ -1,6 +1,6 @@
 
 handlers:
-- url: /oauth/*
+- url: /oauth/.*
   script: main.app
 
 - url: /user/login
