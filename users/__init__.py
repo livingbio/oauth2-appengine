@@ -15,7 +15,6 @@ class User(ndb.Model):
     define a google api like interface
     but implement by ourselves to avoid uncertain condition
     """
-    username = ndb.StringProperty()
     email = ndb.StringProperty()
     password = ndb.StringProperty(indexed=False)
 
@@ -24,7 +23,7 @@ class User(ndb.Model):
     LOGIN_TIMEINTERVAL = timedelta(days=2)
 
     def nickname(self):
-        return self.username
+        return self.email
 
     def email(self):
         return email
@@ -33,8 +32,8 @@ class User(ndb.Model):
         return self.key.id()
 
     @classmethod
-    def get_by_username(self, username):
-        return User.query(User.username == username).get()
+    def get_by_email(self, email):
+        return User.query(User.email == email).get()
 
     def put(self):
         now = datetime.utcnow()
@@ -51,17 +50,14 @@ class User(ndb.Model):
         return secret
 
     @classmethod
-    def login_by_secret(cls, username, secret):
-        return User()
-        user = User.get_by_username(username)
+    def login_by_secret(cls, email, secret):
+        user = User.get_by_email(email)
         if user and secret and user.auth_secret(secret):
             return user
 
     @classmethod
-    def login(cls, username, password):
-        return User()
-
-        user = User.get_by_username(username)
+    def login(cls, email, password):
+        user = User.get_by_email(email)
         if user and password and user.auth(password):
             return user
 
@@ -73,12 +69,12 @@ class User(ndb.Model):
         return secret in [k.secret for k in user.secrets if k.expired > now]
 
     @classmethod
-    def register(cls, username, password):
-        user = User.get_by_username(username)
+    def register(cls, email, password):
+        user = User.get_by_email(email)
         assert not user # username is in used
 
         user = User(
-            username=username,
+            email=email,
             password=password
         )
         user.put()
@@ -89,8 +85,8 @@ def get_current_user(handler):
     username = handler.request.cookies.get('uid')
     secret = handler.request.cookies.get('secret')
 
-    if not username or not secret: return
-    return User.login_by_secret(username, secret)
+    if not email or not secret: return
+    return User.login_by_secret(email, secret)
 
 def login_required(handler_method):
     def wrap(self, *args):
@@ -112,15 +108,15 @@ class LoginHandler(webapp2.RequestHandler):
         )
 
     def post(self):
-        username = self.request.get('username')
+        email = self.request.get('email')
         password = self.request.get('password')
         redirect = self.request.get('redirect_uri')
 
-        user = User.login(username, password)
+        user = User.login(email, password)
         if not user:
             return self.response.out.write(False)
 
-        self.response.set_cookie("uid", str(user.username))
+        self.response.set_cookie("uid", str(user.email))
         self.response.set_cookie("secret", str(user.assign_secret()))
 
         if redirect:
@@ -135,7 +131,23 @@ class LogoutHandler(webapp2.RequestHandler):
             self.response.delete_cookie("uid")
             self.response.delete_cookie("secret")
 
+class RegisterHandler(webapp2.RequestHandler):
+    def get(self):
+        template = jinja2.Template(open('templates/register.html').read())
+        self.response.out.write(
+            template.render({})
+        )
+
+    def post(self):
+        password = self.request.get("password")
+        email = self.request.get("email")
+
+        user = User.register(email, password)
+
+        self.response.out.write(True)
+
 app = webapp2.WSGIApplication([
     (r'/user/login', LoginHandler),
-    (r'/user/logout', LogoutHandler)
+    (r'/user/logout', LogoutHandler),
+    (r'/user/register', RegisterHandler),
 ], debug=False)
