@@ -25,14 +25,14 @@ class User(ndb.Model):
     def nickname(self):
         return self.email
 
-    def email(self):
-        return email
+    # def email(self):
+    #     return self.email
 
     def user_id(self):
         return self.key.id()
 
     @classmethod
-    def get_by_email(self, email):
+    def get_byemail(self, email):
         return User.query(User.email == email).get()
 
     def put(self):
@@ -51,13 +51,13 @@ class User(ndb.Model):
 
     @classmethod
     def login_by_secret(cls, email, secret):
-        user = User.get_by_email(email)
+        user = User.get_byemail(email)
         if user and secret and user.auth_secret(secret):
             return user
 
     @classmethod
     def login(cls, email, password):
-        user = User.get_by_email(email)
+        user = User.get_byemail(email)
         if user and password and user.auth(password):
             return user
 
@@ -70,20 +70,20 @@ class User(ndb.Model):
 
     @classmethod
     def register(cls, email, password):
-        user = User.get_by_email(email)
+        user = User.get_byemail(email)
         if user: return
         # assert not user # username is in used
 
         user = User(
             email=email,
-            password=password
+            password=hashlib.sha1(password).hexdigest()
         )
         user.put()
         return user
 
 
 def get_current_user(handler):
-    username = handler.request.cookies.get('uid')
+    email = handler.request.cookies.get('uid')
     secret = handler.request.cookies.get('secret')
 
     if not email or not secret: return
