@@ -3,8 +3,8 @@ handlers:
 - url: /oauth/.*
   script: main.app
 
-- url: /user/login
+- url: /user/.*
   script: users.app
 
-- url: /user/logout
-  script: users.app
+# - url: /user/logout
+#   script: users.app
