@@ -11,6 +11,10 @@ class Secret(ndb.Model):
     expired = ndb.DateTimeProperty()
 
 class User(ndb.Model):
+    """
+    define a google api like interface
+    but implement by ourselves to avoid uncertain condition
+    """
     username = ndb.StringProperty()
     email = ndb.StringProperty()
     password = ndb.StringProperty(indexed=False)
@@ -19,12 +23,25 @@ class User(ndb.Model):
 
     LOGIN_TIMEINTERVAL = timedelta(days=2)
 
+    def nickname(self):
+        return self.username
+
+    def email(self):
+        return email
+
+    def user_id(self):
+        return self.key.id()
+
+    @classmethod
+    def get_by_username(self, username):
+        return User.query(User.username == username).get()
+
     def put(self):
         now = datetime.utcnow()
         self.secrets = [k for k in self.secrets if k.expired > now]
         return super(User, self).put()
 
-    def gen_secret(self):
+    def assign_secret(self):
         secret = hashlib.sha1(random.random())
         self.secrets.append(Secret(
             secret=secret,
@@ -34,28 +51,30 @@ class User(ndb.Model):
         return secret
 
     @classmethod
-    def login_secret(cls, username, secret):
-        user = User.get_by_id(username)
-        now = datetime.utcnow()
-        if user and secret in [k.secret for k in user.secrets if k.expired > now]:
+    def login_by_secret(cls, username, secret):
+        user = User.get_by_username(username)
+        if user and secret and user.auth_secret(secret):
             return user
 
     @classmethod
     def login(cls, username, password):
-        user = User.get_by_id(username)
-        if user and user.auth(password):
+        user = User.get_by_username(username)
+        if user and password and user.auth(password):
             return user
 
     def auth(self, password):
         return self.password == hashlib.sha1(password).hexdigest()
 
+    def auth_secret(self, secret):
+        now = datetime.utcnow()
+        return secret in [k.secret for k in user.secrets if k.expired > now]
+
     @classmethod
     def register(cls, username, password):
-        user = User.get_by_id(username)
-        assert not user
+        user = User.get_by_username(username)
+        assert not user # username is in used
 
         user = User(
-            id=username,
             username=username,
             password=password
         )
@@ -68,15 +87,14 @@ def get_current_user(handler):
     secret = handler.request.cookies.get('secret')
 
     if not username or not secret: return
-    return User.login_secret(username, secret)
+    return User.login_by_secret(username, secret)
 
 def login_required(handler_method):
     def wrap(self, *args):
-        user = get_current_user(handler)
+        user = get_current_user(self)
         if not user:
             return self.redirect(create_login_url(self.request.uri))
         return handler_method(self, *args)
-
     return wrap
 
 def create_login_url(uri):
@@ -84,16 +102,16 @@ def create_login_url(uri):
 
 class LoginHandler(webapp2.RequestHandler):
     def get(self):
-        redirect = self.request.get('redirect')
+        redirect = self.request.get('redirect_uri')
         template = jinja2.Template(open('templates/login.html').read())
         self.response.out.write(
-            template.render({'redirect': redirect})
+            template.render({'redirect_uri': redirect})
         )
 
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
-        redirect = self.request.get('redirect')
+        redirect = self.request.get('redirect_uri')
 
         user = User.login(username, password)
         if not user:
