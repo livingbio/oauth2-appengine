@@ -32,7 +32,7 @@ class User(ndb.Model):
         return self.key.id()
 
     @classmethod
-    def get_byemail(self, email):
+    def get_by_email(self, email):
         return User.query(User.email == email).get()
 
     def put(self):
@@ -51,13 +51,13 @@ class User(ndb.Model):
 
     @classmethod
     def login_by_secret(cls, email, secret):
-        user = User.get_byemail(email)
+        user = User.get_by_email(email)
         if user and secret and user.auth_secret(secret):
             return user
 
     @classmethod
     def login(cls, email, password):
-        user = User.get_byemail(email)
+        user = User.get_by_email(email)
         if user and password and user.auth(password):
             return user
 
@@ -70,7 +70,7 @@ class User(ndb.Model):
 
     @classmethod
     def register(cls, email, password):
-        user = User.get_byemail(email)
+        user = User.get_by_email(email)
         if user: return
         # assert not user # username is in used
 
