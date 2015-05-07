@@ -13,10 +13,7 @@ class UserTest(unittest.TestCase):
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         self.testbed.init_all_stubs()
-
-        self.cookies = {}
         self.testapp = webtest.TestApp(app)
-
         User.register("old@tagtoo.org", "passwd")
 
         return
@@ -55,13 +52,15 @@ class UserTest(unittest.TestCase):
     def test_login_post_fail(self):
         response = self.testapp.post("/user/login", {"email": "new@tagtoo.org", "password": "passwd"})
         self.assertEqual(response.body, "False")
-        self.assertIsNone(self.testapp.cookies["uid"])
-        self.assertIsNone(self.testapp.cookies["secret"])
+        self.assertNotIn("uid", self.testapp.cookies)
+        self.assertNotIn("secret", self.testapp.cookies)
 
-    def test_logout_get(self):
+    def test_logout(self):
+        # simply login, the unit test for login is in test_login_success function
+        response = self.testapp.post("/user/login", {"email": "old@tagtoo.org", "password": "passwd"})
         response = self.testapp.get("/user/logout")
-        self.assertIsNone(self.testapp.cookies["uid"])
-        self.assertIsNone(self.testapp.cookies["secret"]
+        self.assertNotIn("uid", self.testapp.cookies)
+        self.assertNotIn("secret", self.testapp.cookies)
 
 
 if __name__ == '__main__':
