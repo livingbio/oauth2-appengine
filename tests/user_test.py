@@ -1,6 +1,5 @@
 # -*- encoding=utf8 -*-
 
-import logging
 import unittest
 from google.appengine.ext import testbed
 from users import *
