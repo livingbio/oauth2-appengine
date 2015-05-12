@@ -8,3 +8,6 @@ handlers:
 
 # - url: /user/logout
 #   script: users.app
+
+- url: /.*
+  script: main.app
