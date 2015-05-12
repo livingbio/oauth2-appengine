@@ -88,7 +88,6 @@ class AuthorizationHandler(webapp.RequestHandler):
             self.authz_error('access_denied', "The user did not allow authorization.")
             return
 
-        import pdb;pdb.set_trace()
         response_type = self.request.get('response_type')
 
         if response_type in ['code', 'code_and_token']:
