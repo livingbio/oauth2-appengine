@@ -92,7 +92,7 @@ class AuthorizationHandler(webapp.RequestHandler):
 
         if response_type in ['code', 'code_and_token']:
             code = OAuth_Authorization(
-                user_id         = self.user.user_id(),
+                user_id         = str(self.user.user_id()),
                 client_id       = self.client.client_id,
                 redirect_uri    = self.redirect_uri, )
             code.put()
@@ -102,7 +102,7 @@ class AuthorizationHandler(webapp.RequestHandler):
 
         if response_type in ['token', 'code_and_token']:
             token = OAuth_Token(
-                user_id     = self.user.user_id(),
+                user_id     = str(self.user.user_id()),
                 client_id   = self.client.client_id,
                 scope       = self.request.get('scope'), )
             token.put(can_refresh=False)
@@ -204,7 +204,8 @@ class AccessTokenHandler(webapp.RequestHandler):
         self.render_response(token)
 
     def handle_authorization_code(self, client, scope=None):
-        authorization   = OAuth_Authorization.get_by_code(self.request.get('code'))
+        code = self.request.get('code')
+        authorization   = OAuth_Authorization.get_by_code(code)
         redirect_uri    = self.request.get('redirect_url')
 
         if not authorization or not authorization.validate(code, redirect_uri, client.client_id):
