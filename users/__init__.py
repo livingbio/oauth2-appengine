@@ -66,7 +66,7 @@ class User(ndb.Model):
 
     def auth_secret(self, secret):
         now = datetime.utcnow()
-        return secret in [k.secret for k in user.secrets if k.expired > now]
+        return secret in [k.secret for k in self.secrets if k.expired > now]
 
     @classmethod
     def register(cls, email, password):
