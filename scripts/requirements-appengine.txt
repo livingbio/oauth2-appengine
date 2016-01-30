@@ -1,6 +1,24 @@
-# package include in appengine enviornment
+# Python Imaging Library (Fork)
+# https://pypi.python.org/pypi/Pillow/2.7.0
 Pillow==2.7.0
+
+
+# Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.
+# https://pypi.python.org/pypi/lxml/3.4.1
 lxml==3.4.1
+
+
+# Taking Google App Engine's webapp to the next level!
+# https://pypi.python.org/pypi/webapp2/2.5.2
 webapp2>=2.5.2
-jinja2>=2.6
-pyyaml>=3.10
+
+
+# A small but fast and easy to use stand-alone template engine written in pure python.
+# https://pypi.python.org/pypi/Jinja2/2.6
+Jinja2>=2.6
+
+
+# YAML parser and emitter for Python
+# https://pypi.python.org/pypi/PyYAML/3.10
+PyYAML>=3.10
+

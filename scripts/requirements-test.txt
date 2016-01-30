@@ -1,10 +1,44 @@
-# package for test only or include in appengine enviornment
+# The new features in unittest backported to Python 2.4+.
+# https://pypi.python.org/pypi/unittest2/0.8.0
 unittest2==0.8.0
+
+
+# Helper to test WSGI applications
+# https://pypi.python.org/pypi/WebTest/2.0.16
 WebTest==2.0.16
+
+
+# Faker is a Python package that generates fake data for you.
+# https://pypi.python.org/pypi/fake-factory/0.4.2
 fake-factory==0.4.2
+
+
+# A Python Mocking and Patching Library for Testing
+# https://pypi.python.org/pypi/mock/1.0.1
 mock==1.0.1
+
+
+# nose plugin for coverage reporting, including subprocesses and multiprocessing
+# https://pypi.python.org/pypi/nose-cov/1.6
 nose-cov==1.6
+
+
+# Code coverage measurement for Python
+# https://pypi.python.org/pypi/coverage/3.7.1
 coverage==3.7.1
+
+
+# Convert functions into multi-command program breezily.
+# https://pypi.python.org/pypi/clime/0.2.7
 clime==0.2.7
-nosegae
-nose-exclude
+
+
+# NoseGAE: nose plugin for Google App Engine testing
+# https://pypi.python.org/pypi/NoseGAE/0.5.8
+NoseGAE==0.5.8
+
+
+# Exclude specific directories from nosetests runs.
+# https://pypi.python.org/pypi/nose-exclude/0.4.1
+nose-exclude==0.4.1
+
