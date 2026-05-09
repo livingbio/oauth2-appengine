@@ -5,7 +5,7 @@ Pillow==2.7.0
 
 # Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.
 # https://pypi.python.org/pypi/lxml/3.4.1
-lxml==3.4.1
+lxml==6.1.0
 
 
 # Taking Google App Engine's webapp to the next level!
