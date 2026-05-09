@@ -1,6 +1,6 @@
 # Python Imaging Library (Fork)
 # https://pypi.python.org/pypi/Pillow/2.7.0
-Pillow==2.7.0
+Pillow==12.2.0
 
 
 # Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.
